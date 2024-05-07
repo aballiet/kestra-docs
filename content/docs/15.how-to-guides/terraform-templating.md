@@ -212,12 +212,23 @@ module "stripe_events_incremental" {
       id   = module.airbyte_connection_stripe_offical.connection_id
     }
   ]
-  max_sync_duration   = "PT30M"
   airbyte_url         = var.airbyte_url
   cron_expression     = "@hourly"
   late_maximum_delay  = "PT1H"
+  max_sync_duration   = "PT30M"
 }
 ```
+
+> Some notes :
+> - `priority=high` is a priority tag to apply to the flow. When scaling Kestra codebase, it's nice to have a priority tags to help you manage critical flows.
+> - `namespace=local.namespace` is a variable defined in the `main.tf` file that contains the namespace for the flow.
+> - `module.airbyte_connection_stripe_offical.connection_id` is a reference to another module that defines the connection id for the Airbyte connection.
+> - `airbyte_url=var.airbyte_url` is a variable defined in the `main.tf` file that contains the Airbyte URL.
+> - `cron_expression=@hourly` is a cron expression that will trigger the flow every hour.
+> - `late_maximum_delay=PT1H` is a duration that will allow to disable auto-backfill : if the schedule didn't start after this delay, the execution will be skip.
+> - `PT30M` is a duration that will tell Kestra to wait logs for this max duration. If the flow takes more than 30 minutes to execute, it will be considered as failed.
+
+All this description can be tuned in the `variables.tf` file, making it easier to understand and use for users unfamiliar with Kestra syntax or concepts.
 
 ## Subflows vs Terraform templating
 
